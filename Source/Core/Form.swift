@@ -164,7 +164,7 @@ public final class Form {
     private lazy var kvoWrapper : KVOWrapper = { [unowned self] in return KVOWrapper(form: self) }()
 }
 
-extension Form : MutableCollection {
+extension Form : MutableCollection, BidirectionalCollection {
     
     // MARK: MutableCollectionType
     
@@ -174,8 +174,13 @@ extension Form : MutableCollection {
         get { return kvoWrapper.sections[position] as! Section }
         set { kvoWrapper.sections[position] = newValue }
     }
+    public subscript (range: Range<Int>) -> [Section] {
+        get { return kvoWrapper.sections.objects(at: NSIndexSet(indexesIn: NSRange(range))) as! [Section] }
+        set { kvoWrapper.sections.replaceObjects(in: NSRange(range), withObjectsFrom: newValue) }
+    }
 
     public func index(after i: Int) -> Int {return i + 1}
+    public func index(before i: Int) -> Int {return i - 1}
 }
 
 extension Form : RangeReplaceableCollection {
