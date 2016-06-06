@@ -735,8 +735,8 @@ extension FormViewController : UITableViewDelegate {
 extension FormViewController : UITableViewDataSource {
     
     //MARK: UITableViewDataSource
-    
-    @nonobjc public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+
+    public func numberOfSections(in tableView: UITableView) -> Int {
         return form.count
     }
     
