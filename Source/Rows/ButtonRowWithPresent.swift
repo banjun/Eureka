@@ -32,14 +32,14 @@ public class _ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType 
     required public init(tag: String?) {
         super.init(tag: tag)
         displayValueFor = nil
-        cellStyle = .Default
+        cellStyle = .default
     }
     
     public override func customUpdateCell() {
         super.customUpdateCell()
         let leftAligmnment = presentationMode != nil
-        cell.textLabel?.textAlignment = leftAligmnment ? .Left : .Center
-        cell.accessoryType = !leftAligmnment || isDisabled ? .None : .DisclosureIndicator
+        cell.textLabel?.textAlignment = leftAligmnment ? .left : .center
+        cell.accessoryType = !leftAligmnment || isDisabled ? .none : .disclosureIndicator
         cell.editingAccessoryType = cell.accessoryType
         if (!leftAligmnment){
             var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
@@ -57,16 +57,16 @@ public class _ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType 
             if let controller = presentationMode.createController(){
                 controller.row = self
                 onPresentCallback?(cell.formViewController()!, controller)
-                presentationMode.presentViewController(controller, row: self, presentingViewController: cell.formViewController()!)
+                presentationMode.presentViewController(viewController: controller, row: self, presentingViewController: cell.formViewController()!)
             }
             else{
-                presentationMode.presentViewController(nil, row: self, presentingViewController: cell.formViewController()!)
+                presentationMode.presentViewController(viewController: nil, row: self, presentingViewController: cell.formViewController()!)
             }
         }
     }
     
     public override func prepareForSegue(segue: UIStoryboardSegue) {
-        super.prepareForSegue(segue)
+        super.prepareForSegue(segue: segue)
         guard let rowVC = segue.destinationViewController as? VCType else {
             return
         }

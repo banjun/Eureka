@@ -35,7 +35,7 @@ class HomeViewController : FormViewController {
         
         ImageRow.defaultCellUpdate = { cell, row in
            cell.accessoryView?.layer.cornerRadius = 17
-           cell.accessoryView?.frame = CGRectMake(0, 0, 34, 34)
+           cell.accessoryView?.frame = CGRect(x: 0, y: 0, width: 34, height: 34)
         }
         
         form =
@@ -952,8 +952,8 @@ class FormatterExample : FormViewController {
     class CurrencyFormatter : NSNumberFormatter, FormatterProtocol {
         override func getObjectValue(obj: AutoreleasingUnsafeMutablePointer<AnyObject?>, forString string: String, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>) -> Bool {
             guard obj != nil else { return false }
-            let str = string.componentsSeparatedByCharactersInSet(NSCharacterSet.decimalDigitCharacterSet().invertedSet).joinWithSeparator("")
-            obj.memory = NSNumber(double: (Double(str) ?? 0.0)/Double(pow(10.0, Double(minimumFractionDigits))))
+            let str = string.components(separatedBy: NSCharacterSet.decimalDigitCharacterSet().invertedSet).joined(separator: "")
+            obj.pointee = NSNumber(value: (Double(str) ?? 0.0)/Double(pow(10.0, Double(minimumFractionDigits))))
             return true
         }
         

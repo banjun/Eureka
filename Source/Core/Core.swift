@@ -32,7 +32,7 @@ internal class RowDefaults {
     static var cellSetup = Dictionary<String, (BaseCell, BaseRow) -> Void>()
     static var onCellHighlight = Dictionary<String, (BaseCell, BaseRow) -> Void>()
     static var onCellUnHighlight = Dictionary<String, (BaseCell, BaseRow) -> Void>()
-    static var rowInitialization = Dictionary<String, BaseRow -> Void>()
+    static var rowInitialization = Dictionary<String, (BaseRow) -> Void>()
     static var rawCellUpdate = Dictionary<String, Any>()
     static var rawCellSetup = Dictionary<String, Any>()
     static var rawOnCellHighlight = Dictionary<String, Any>()
@@ -56,7 +56,7 @@ public struct CellProvider<Cell: BaseCell where Cell: CellType> {
     
     public init(nibName: String, bundle: NSBundle? = nil){
         self.nibName = nibName
-        self.bundle = bundle ?? NSBundle(forClass: Cell.self)
+        self.bundle = bundle ?? NSBundle(for: Cell.self)
     }
     
     /**
@@ -103,10 +103,10 @@ public enum ControllerProvider<VCType: UIViewController>{
             case .Callback(let builder):
                 return builder()
             case .NibFile(let nibName, let bundle):
-                return VCType.init(nibName: nibName, bundle:bundle ?? NSBundle(forClass: VCType.self))
+                return VCType.init(nibName: nibName, bundle:bundle ?? NSBundle(for: VCType.self))
             case .StoryBoard(let storyboardId, let storyboardName, let bundle):
-                let sb = UIStoryboard(name: storyboardName, bundle: bundle ?? NSBundle(forClass: VCType.self))
-                return sb.instantiateViewControllerWithIdentifier(storyboardId) as! VCType
+                let sb = UIStoryboard(name: storyboardName, bundle: bundle ?? NSBundle(for: VCType.self))
+                return sb.instantiateViewController(withIdentifier: storyboardId) as! VCType
         }
     }
 }
@@ -136,28 +136,28 @@ public enum PresentationMode<VCType: UIViewController> {
     /**
      *  Shows the controller, created by the specified provider, with `showViewController(...)`.
      */
-    case Show(controllerProvider: ControllerProvider<VCType>, completionCallback: (UIViewController->())?)
+    case Show(controllerProvider: ControllerProvider<VCType>, completionCallback: ((UIViewController)->())?)
     
     /**
      *  Presents the controller, created by the specified provider, modally.
      */
-    case PresentModally(controllerProvider: ControllerProvider<VCType>, completionCallback: (UIViewController->())?)
+    case PresentModally(controllerProvider: ControllerProvider<VCType>, completionCallback: ((UIViewController)->())?)
     
     /**
      *  Performs the segue with the specified identifier (name).
      */
-    case SegueName(segueName: String, completionCallback: (UIViewController->())?)
+    case SegueName(segueName: String, completionCallback: ((UIViewController)->())?)
     
     /**
      *  Performs a segue from a segue class.
      */
-    case SegueClass(segueClass: UIStoryboardSegue.Type, completionCallback: (UIViewController->())?)
+    case SegueClass(segueClass: UIStoryboardSegue.Type, completionCallback: ((UIViewController)->())?)
     
     
-    case Popover(controllerProvider: ControllerProvider<VCType>, completionCallback: (UIViewController->())?)
+    case Popover(controllerProvider: ControllerProvider<VCType>, completionCallback: ((UIViewController)->())?)
     
     
-    var completionHandler: (UIViewController ->())? {
+    var completionHandler: ((UIViewController) ->())? {
         switch self{
             case .Show(_, let completionCallback):
                 return completionCallback
@@ -183,14 +183,14 @@ public enum PresentationMode<VCType: UIViewController> {
     public func presentViewController(viewController: VCType!, row: BaseRow, presentingViewController:FormViewController){
         switch self {
             case .Show(_, _):
-                presentingViewController.showViewController(viewController, sender: row)
+                presentingViewController.show(viewController, sender: row)
             case .PresentModally(_, _):
-                presentingViewController.presentViewController(viewController, animated: true, completion: nil)
+                presentingViewController.present(viewController, animated: true, completion: nil)
             case .SegueName(let segueName, _):
-                presentingViewController.performSegueWithIdentifier(segueName, sender: row)
+                presentingViewController.performSegue(withIdentifier: segueName, sender: row)
             case .SegueClass(let segueClass, _):
                 let segue = segueClass.init(identifier: row.tag, source: presentingViewController, destination: viewController)
-                presentingViewController.prepareForSegue(segue, sender: row)
+                presentingViewController.prepare(for: segue, sender: row)
                 segue.perform()
             case .Popover(_, _):
                 guard let porpoverController = viewController.popoverPresentationController else {
@@ -198,7 +198,7 @@ public enum PresentationMode<VCType: UIViewController> {
                 }
                 porpoverController.sourceView = porpoverController.sourceView ?? presentingViewController.tableView
                 porpoverController.sourceRect = porpoverController.sourceRect ?? row.baseCell.frame
-                presentingViewController.presentViewController(viewController, animated: true, completion: nil)
+                presentingViewController.present(viewController, animated: true, completion: nil)
             }
         
     }
@@ -226,7 +226,7 @@ public enum PresentationMode<VCType: UIViewController> {
                 return controller
             case .Popover(let controllerProvider, let completionCallback):
                 let controller = controllerProvider.createController()
-                controller.modalPresentationStyle = .Popover
+                controller.modalPresentationStyle = .popover
                 let completionController = controller as? RowControllerType
                 if let callback = completionCallback {
                     completionController?.completionCallback = callback
@@ -242,7 +242,7 @@ public enum PresentationMode<VCType: UIViewController> {
  *  Protocol to be implemented by custom formatters.
  */
 public protocol FormatterProtocol {
-    func getNewPosition(forPosition forPosition: UITextPosition, inTextInput textInput: UITextInput, oldValue: String?, newValue: String?) -> UITextPosition
+    func getNewPosition(forPosition: UITextPosition, inTextInput textInput: UITextInput, oldValue: String?, newValue: String?) -> UITextPosition
 }
 
 //MARK: Predicate Machine
@@ -266,7 +266,7 @@ public enum Condition {
      *
      *  @return If the condition is true or false
      */
-    case Function([String], Form->Bool)
+    case Function([String], (Form)->Bool)
     
     /**
      *  Calculate the condition using a NSPredicate
@@ -319,7 +319,7 @@ Errors thrown by Eureka
 
 - DuplicatedTag: When a section or row is inserted whose tag dows already exist
 */
-public enum EurekaError : ErrorType {
+public enum EurekaError : ErrorProtocol {
     case DuplicatedTag(tag: String)
 }
 
@@ -345,7 +345,7 @@ public protocol FormViewControllerProtocol {
 /**
  *  Navigation options for a form view controller.
  */
-public struct RowNavigationOptions : OptionSetType {
+public struct RowNavigationOptions : OptionSet {
     
     private enum NavigationOptions : Int {
         case Disabled = 0, Enabled = 1, StopDisabledRow = 2, SkipCanNotBecomeFirstResponderRow = 4
@@ -353,7 +353,7 @@ public struct RowNavigationOptions : OptionSetType {
     public let rawValue: Int
     public  init(rawValue: Int){ self.rawValue = rawValue}
     private init(_ options:NavigationOptions ){ self.rawValue = options.rawValue }
-    @available(*, unavailable, renamed="Disabled")
+    @available(*, unavailable, renamed:"Disabled")
     
     /// No navigation.
     public static let None = RowNavigationOptions(.Disabled)
@@ -376,10 +376,10 @@ public struct RowNavigationOptions : OptionSetType {
  */
 public struct KeyboardReturnTypeConfiguration {
     /// Used when the next row is available.
-    public var nextKeyboardType = UIReturnKeyType.Next
+    public var nextKeyboardType = UIReturnKeyType.next
     
     /// Used if next row is not available.
-    public var defaultKeyboardType = UIReturnKeyType.Default
+    public var defaultKeyboardType = UIReturnKeyType.default
     
     public init(){}
     
@@ -392,7 +392,7 @@ public struct KeyboardReturnTypeConfiguration {
 /**
  *  Options that define when an inline row should collapse.
  */
-public struct InlineRowHideOptions : OptionSetType {
+public struct InlineRowHideOptions : OptionSet {
     
     private enum _InlineRowHideOptions : Int {
         case Never = 0, AnotherInlineRowIsShown = 1, FirstResponderChanges = 2
@@ -438,14 +438,14 @@ public class FormViewController : UIViewController, FormViewControllerProtocol {
     /// Accessory view that is responsible for the navigation between rows
     lazy public var navigationAccessoryView : NavigationAccessoryView = {
         [unowned self] in
-        let naview = NavigationAccessoryView(frame: CGRectMake(0, 0, self.view.frame.width, 44.0))
+        let naview = NavigationAccessoryView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44.0))
         naview.tintColor = self.view.tintColor
         return naview
         }()
     
     /// Defines the behaviour of the navigation between rows
     public var navigationOptions : RowNavigationOptions?
-    private var tableViewStyle: UITableViewStyle = .Grouped
+    private var tableViewStyle: UITableViewStyle = .grouped
     
     public init(style: UITableViewStyle) {
         super.init(nibName: nil, bundle: nil)
@@ -464,7 +464,7 @@ public class FormViewController : UIViewController, FormViewControllerProtocol {
         super.viewDidLoad()
         if tableView == nil {
             tableView = UITableView(frame: view.bounds, style: tableViewStyle)
-            tableView?.autoresizingMask = UIViewAutoresizing.FlexibleWidth.union(.FlexibleHeight)
+            tableView?.autoresizingMask = UIViewAutoresizing.flexibleWidth.union(.flexibleHeight)
             if #available(iOS 9.0, *){
                 tableView?.cellLayoutMarginsFollowReadableWidth = false
             }
@@ -481,52 +481,52 @@ public class FormViewController : UIViewController, FormViewControllerProtocol {
         tableView?.estimatedRowHeight = BaseRow.estimatedRowHeight
     }
     
-    public override func viewWillAppear(animated: Bool) {
+    public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
         let selectedIndexPaths = tableView?.indexPathsForSelectedRows ?? []
-        tableView?.reloadRowsAtIndexPaths(selectedIndexPaths, withRowAnimation: .None)
+        tableView?.reloadRows(at: selectedIndexPaths, with: .none)
         selectedIndexPaths.forEach {
-            tableView?.selectRowAtIndexPath($0, animated: false, scrollPosition: .None)
+            tableView?.selectRow(at: $0, animated: false, scrollPosition: .none)
         }
 
         let deselectionAnimation = { [weak self] (context: UIViewControllerTransitionCoordinatorContext) in
             selectedIndexPaths.forEach {
-                self?.tableView?.deselectRowAtIndexPath($0, animated: context.isAnimated())
+                self?.tableView?.deselectRow(at: $0, animated: context.isAnimated())
             }
         }
 
         let reselection = { [weak self] (context: UIViewControllerTransitionCoordinatorContext) in
             if context.isCancelled() {
                 selectedIndexPaths.forEach {
-                    self?.tableView?.selectRowAtIndexPath($0, animated: false, scrollPosition: .None)
+                    self?.tableView?.selectRow(at: $0, animated: false, scrollPosition: .none)
                 }
             }
         }
 
         if let coordinator = transitionCoordinator() {
-            coordinator.animateAlongsideTransitionInView(parentViewController?.view, animation: deselectionAnimation, completion: reselection)
+            coordinator.animateAlongsideTransition(in: parent?.view, animation: deselectionAnimation, completion: reselection)
         }
         else {
             selectedIndexPaths.forEach {
-                tableView?.deselectRowAtIndexPath($0, animated: false)
+                tableView?.deselectRow(at: $0, animated: false)
             }
         }
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(FormViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(FormViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
+        NSNotificationCenter.default().addObserver(self, selector: #selector(FormViewController.keyboardWillShow(notification:)), name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.default().addObserver(self, selector: #selector(FormViewController.keyboardWillHide(notification:)), name: UIKeyboardWillHideNotification, object: nil)
     }
     
-    public override func viewDidDisappear(animated: Bool) {
+    public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
+        NSNotificationCenter.default().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.default().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
     }
     
-    public override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        super.prepareForSegue(segue, sender: sender)
+    public override func prepare(for segue: UIStoryboardSegue, sender: AnyObject?) {
+        super.prepare(for: segue, sender: sender)
         let baseRow = sender as? BaseRow
-        baseRow?.prepareForSegue(segue)
+        baseRow?.prepareForSegue(segue: segue)
     }
     
     /**
@@ -536,14 +536,14 @@ public class FormViewController : UIViewController, FormViewControllerProtocol {
         let options = navigationOptions ?? Form.defaultNavigationOptions
         guard options.contains(.Enabled) else { return nil }
         guard row.baseCell.cellCanBecomeFirstResponder() else { return nil}
-        navigationAccessoryView.previousButton.enabled = nextRowForRow(row, withDirection: .Up) != nil
+        navigationAccessoryView.previousButton.isEnabled = nextRowForRow(currentRow: row, withDirection: .Up) != nil
         navigationAccessoryView.doneButton.target = self
-        navigationAccessoryView.doneButton.action = #selector(FormViewController.navigationDone(_:))
+        navigationAccessoryView.doneButton.action = #selector(FormViewController.navigationDone(sender:))
         navigationAccessoryView.previousButton.target = self
-        navigationAccessoryView.previousButton.action = #selector(FormViewController.navigationAction(_:))
+        navigationAccessoryView.previousButton.action = #selector(FormViewController.navigationAction(sender:))
         navigationAccessoryView.nextButton.target = self
-        navigationAccessoryView.nextButton.action = #selector(FormViewController.navigationAction(_:))
-        navigationAccessoryView.nextButton.enabled = nextRowForRow(row, withDirection: .Down) != nil
+        navigationAccessoryView.nextButton.action = #selector(FormViewController.navigationAction(sender:))
+        navigationAccessoryView.nextButton.isEnabled = nextRowForRow(currentRow: row, withDirection: .Down) != nil
         return navigationAccessoryView
     }
     
@@ -560,7 +560,7 @@ public class FormViewController : UIViewController, FormViewControllerProtocol {
         cell.row.hightlightCell()
         guard let _ = tableView where (form.inlineRowHideOptions ?? Form.defaultInlineRowHideOptions).contains(.FirstResponderChanges) else { return }
         let row = cell.baseRow
-        let inlineRow = row._inlineRow
+        let inlineRow = row?._inlineRow
         for row in form.allRows.filter({ $0 !== row && $0 !== inlineRow && $0._inlineRow != nil }) {
             if let inlineRow = row as? BaseInlineRowType {
                 inlineRow.collapseInlineRow()
@@ -579,42 +579,42 @@ public class FormViewController : UIViewController, FormViewControllerProtocol {
      Returns the animation for the insertion of the given rows.
      */
     public func insertAnimationForRows(rows: [BaseRow]) -> UITableViewRowAnimation {
-        return .Fade
+        return .fade
     }
     
     /**
      Returns the animation for the deletion of the given rows.
      */
     public func deleteAnimationForRows(rows: [BaseRow]) -> UITableViewRowAnimation {
-        return .Fade
+        return .fade
     }
     
     /**
      Returns the animation for the reloading of the given rows.
      */
     public func reloadAnimationOldRows(oldRows: [BaseRow], newRows: [BaseRow]) -> UITableViewRowAnimation {
-        return .Automatic
+        return .automatic
     }
     
     /**
      Returns the animation for the insertion of the given sections.
      */
     public func insertAnimationForSections(sections: [Section]) -> UITableViewRowAnimation {
-        return .Automatic
+        return .automatic
     }
     
     /**
      Returns the animation for the deletion of the given sections.
      */
     public func deleteAnimationForSections(sections: [Section]) -> UITableViewRowAnimation {
-        return .Automatic
+        return .automatic
     }
     
     /**
      Returns the animation for the reloading of the given sections.
      */
     public func reloadAnimationOldSections(oldSections: [Section], newSections: [Section]) -> UITableViewRowAnimation {
-        return .Automatic
+        return .automatic
     }
     
     //MARK: TextField and TextView Delegate
@@ -625,7 +625,7 @@ public class FormViewController : UIViewController, FormViewControllerProtocol {
     
     public func textInputDidBeginEditing<T>(textInput: UITextInput, cell: Cell<T>) {
         if let row = cell.row as? KeyboardReturnHandler {
-            let nextRow = nextRowForRow(cell.row, withDirection: .Down)
+            let nextRow = nextRowForRow(currentRow: cell.row, withDirection: .Down)
             if let textField = textInput as? UITextField {
                 textField.returnKeyType = nextRow != nil ? (row.keyboardReturnType?.nextKeyboardType ?? (form.keyboardReturnType?.nextKeyboardType ?? Form.defaultKeyboardReturnType.nextKeyboardType )) : (row.keyboardReturnType?.defaultKeyboardType ?? (form.keyboardReturnType?.defaultKeyboardType ?? Form.defaultKeyboardReturnType.defaultKeyboardType))
             }
@@ -652,7 +652,7 @@ public class FormViewController : UIViewController, FormViewControllerProtocol {
     }
 
     public func textInputShouldReturn<T>(textInput: UITextInput, cell: Cell<T>) -> Bool {
-        if let nextRow = nextRowForRow(cell.row, withDirection: .Down){
+        if let nextRow = nextRowForRow(currentRow: cell.row, withDirection: .Down){
             if nextRow.baseCell.cellCanBecomeFirstResponder(){
                 nextRow.baseCell.cellBecomeFirstResponder()
                 return true
@@ -671,11 +671,11 @@ extension FormViewController : UITableViewDelegate {
     
     //MARK: UITableViewDelegate
     
-    public func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+    public func tableView(_ tableView: UITableView, willSelectRowAt indexPath: NSIndexPath) -> NSIndexPath? {
         return indexPath
     }
     
-    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: NSIndexPath) {
         guard tableView == self.tableView else { return }
         let row = form[indexPath]
         // row.baseCell.cellBecomeFirstResponder() may be cause InlineRow collapsed then section count will be changed. Use orignal indexPath will out of  section's bounds.
@@ -685,31 +685,31 @@ extension FormViewController : UITableViewDelegate {
         row.didSelect()
     }
     
-    public func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: NSIndexPath) -> CGFloat {
         guard tableView == self.tableView else { return tableView.rowHeight }
         let row = form[indexPath.section][indexPath.row]
         return row.baseCell.height?() ?? tableView.rowHeight
     }
     
-    public func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: NSIndexPath) -> CGFloat {
         guard tableView == self.tableView else { return tableView.rowHeight }
         let row = form[indexPath.section][indexPath.row]
         return row.baseCell.height?() ?? tableView.estimatedRowHeight
     }
     
-    public func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return form[section].header?.viewForSection(form[section], type: .Header)
+    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return form[section].header?.viewForSection(section: form[section], type: .Header)
     }
     
-    public func tableView(tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        return form[section].footer?.viewForSection(form[section], type:.Footer)
+    public func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        return form[section].footer?.viewForSection(section: form[section], type:.Footer)
     }
     
-    public func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if let height = form[section].header?.height {
             return height()
         }
-        guard let view = form[section].header?.viewForSection(form[section], type: .Header) else{
+        guard let view = form[section].header?.viewForSection(section: form[section], type: .Header) else{
             return UITableViewAutomaticDimension
         }
         guard view.bounds.height != 0 else {
@@ -718,11 +718,11 @@ extension FormViewController : UITableViewDelegate {
         return view.bounds.height
     }
     
-    public func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+    public func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         if let height = form[section].footer?.height {
             return height()
         }
-        guard let view = form[section].footer?.viewForSection(form[section], type: .Footer) else{
+        guard let view = form[section].footer?.viewForSection(section: form[section], type: .Footer) else{
             return UITableViewAutomaticDimension
         }
         guard view.bounds.height != 0 else {
@@ -736,24 +736,24 @@ extension FormViewController : UITableViewDataSource {
     
     //MARK: UITableViewDataSource
     
-    public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    @nonobjc public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return form.count
     }
     
-    public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return form[section].count
     }
     
-    public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: NSIndexPath) -> UITableViewCell {
     	form[indexPath].updateCell()
         return form[indexPath].baseCell
     }
     
-    public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    public func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         return form[section].header?.title
     }
     
-    public func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return form[section].footer?.title
     }
 }
@@ -764,37 +764,37 @@ extension FormViewController: FormDelegate {
     
     public func sectionsHaveBeenAdded(sections: [Section], atIndexes: NSIndexSet){
         tableView?.beginUpdates()
-        tableView?.insertSections(atIndexes, withRowAnimation: insertAnimationForSections(sections))
+        tableView?.insertSections(atIndexes, with: insertAnimationForSections(sections: sections))
         tableView?.endUpdates()
     }
     
     public func sectionsHaveBeenRemoved(sections: [Section], atIndexes: NSIndexSet){
         tableView?.beginUpdates()
-        tableView?.deleteSections(atIndexes, withRowAnimation: deleteAnimationForSections(sections))
+        tableView?.deleteSections(atIndexes, with: deleteAnimationForSections(sections: sections))
         tableView?.endUpdates()
     }
     
-    public func sectionsHaveBeenReplaced(oldSections oldSections:[Section], newSections: [Section], atIndexes: NSIndexSet){
+    public func sectionsHaveBeenReplaced(oldSections:[Section], newSections: [Section], atIndexes: NSIndexSet){
         tableView?.beginUpdates()
-        tableView?.reloadSections(atIndexes, withRowAnimation: reloadAnimationOldSections(oldSections, newSections: newSections))
+        tableView?.reloadSections(atIndexes, with: reloadAnimationOldSections(oldSections: oldSections, newSections: newSections))
         tableView?.endUpdates()
     }
     
     public func rowsHaveBeenAdded(rows: [BaseRow], atIndexPaths: [NSIndexPath]) {
         tableView?.beginUpdates()
-        tableView?.insertRowsAtIndexPaths(atIndexPaths, withRowAnimation: insertAnimationForRows(rows))
+        tableView?.insertRows(at: atIndexPaths, with: insertAnimationForRows(rows: rows))
         tableView?.endUpdates()
     }
     
     public func rowsHaveBeenRemoved(rows: [BaseRow], atIndexPaths: [NSIndexPath]) {
         tableView?.beginUpdates()
-        tableView?.deleteRowsAtIndexPaths(atIndexPaths, withRowAnimation: deleteAnimationForRows(rows))
+        tableView?.deleteRows(at: atIndexPaths, with: deleteAnimationForRows(rows: rows))
         tableView?.endUpdates()
     }
 
-    public func rowsHaveBeenReplaced(oldRows oldRows:[BaseRow], newRows: [BaseRow], atIndexPaths: [NSIndexPath]){
+    public func rowsHaveBeenReplaced(oldRows:[BaseRow], newRows: [BaseRow], atIndexPaths: [NSIndexPath]){
         tableView?.beginUpdates()
-        tableView?.reloadRowsAtIndexPaths(atIndexPaths, withRowAnimation: reloadAnimationOldRows(oldRows, newRows: newRows))
+        tableView?.reloadRows(at: atIndexPaths, with: reloadAnimationOldRows(oldRows: oldRows, newRows: newRows))
         tableView?.endUpdates()
     }
 }
@@ -803,7 +803,7 @@ extension FormViewController : UIScrollViewDelegate {
     
     //MARK: UIScrollViewDelegate
     
-    public func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         tableView?.endEditing(true)
     }
 }
@@ -818,7 +818,7 @@ extension FormViewController {
     public func keyboardWillShow(notification: NSNotification){
         guard let table = tableView, let cell = table.findFirstResponder()?.formCell() else { return }
         let keyBoardInfo = notification.userInfo!
-        let keyBoardFrame = table.window!.convertRect((keyBoardInfo[UIKeyboardFrameEndUserInfoKey]?.CGRectValue)!, toView: table.superview)
+        let keyBoardFrame = table.window!.convert((keyBoardInfo[UIKeyboardFrameEndUserInfoKey]?.cgRectValue)!, to: table.superview)
         let newBottomInset = table.frame.origin.y + table.frame.size.height - keyBoardFrame.origin.y
         var tableInsets = table.contentInset
         var scrollIndicatorInsets = table.scrollIndicatorInsets
@@ -831,8 +831,8 @@ extension FormViewController {
             UIView.setAnimationCurve(UIViewAnimationCurve(rawValue: keyBoardInfo[UIKeyboardAnimationCurveUserInfoKey]!.integerValue)!)
             table.contentInset = tableInsets
             table.scrollIndicatorInsets = scrollIndicatorInsets
-            if let selectedRow = table.indexPathForCell(cell) {
-                table.scrollToRowAtIndexPath(selectedRow, atScrollPosition: .None, animated: false)
+            if let selectedRow = table.indexPath(for: cell) {
+                table.scrollToRow(at: selectedRow, at: .none, animated: false)
             }
             UIView.commitAnimations()
         }
@@ -869,16 +869,16 @@ extension FormViewController {
     }
     
     func navigationAction(sender: UIBarButtonItem) {
-        navigateToDirection(sender == navigationAccessoryView.previousButton ? .Up : .Down)
+        navigateToDirection(direction: sender == navigationAccessoryView.previousButton ? .Up : .Down)
     }
     
     public func navigateToDirection(direction: Direction){
         guard let currentCell = tableView?.findFirstResponder()?.formCell() else { return }
-        guard let currentIndexPath = tableView?.indexPathForCell(currentCell) else { assertionFailure(); return }
-        guard let nextRow = nextRowForRow(form[currentIndexPath], withDirection: direction) else { return }
+        guard let currentIndexPath = tableView?.indexPath(for: currentCell) else { assertionFailure(); return }
+        guard let nextRow = nextRowForRow(currentRow: form[currentIndexPath], withDirection: direction) else { return }
         if nextRow.baseCell.cellCanBecomeFirstResponder(){
-            tableView?.scrollToRowAtIndexPath(nextRow.indexPath()!, atScrollPosition: .None, animated: false)
-            nextRow.baseCell.cellBecomeFirstResponder(direction)
+            tableView?.scrollToRow(at: nextRow.indexPath()!, at: .none, animated: false)
+            nextRow.baseCell.cellBecomeFirstResponder(direction: direction)
         }
     }
     
@@ -886,7 +886,7 @@ extension FormViewController {
         
         let options = navigationOptions ?? Form.defaultNavigationOptions
         guard options.contains(.Enabled) else { return nil }
-        guard let nextRow = direction == .Down ? form.nextRowForRow(currentRow) : form.previousRowForRow(currentRow) else { return nil }
+        guard let nextRow = direction == .Down ? form.nextRowForRow(currentRow: currentRow) : form.previousRowForRow(currentRow: currentRow) else { return nil }
         if nextRow.isDisabled && options.contains(.StopDisabledRow) {
             return nil
         }
@@ -896,7 +896,7 @@ extension FormViewController {
         if (!nextRow.isDisabled && nextRow.baseCell.cellCanBecomeFirstResponder()){
             return nextRow
         }
-        return nextRowForRow(nextRow, withDirection:direction)
+        return nextRowForRow(currentRow: nextRow, withDirection:direction)
     }
 }
 
@@ -907,7 +907,7 @@ extension FormViewControllerProtocol {
     func makeRowVisible(row: BaseRow){
         guard let cell = row.baseCell, indexPath = row.indexPath(), tableView = tableView else { return }
         if cell.window == nil || (tableView.contentOffset.y + tableView.frame.size.height <= cell.frame.origin.y + cell.frame.size.height){
-            tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+            tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
         }
     }
 }

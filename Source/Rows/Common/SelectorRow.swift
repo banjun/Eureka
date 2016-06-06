@@ -16,9 +16,9 @@ public class PushSelectorCell<T: Equatable> : Cell<T>, CellType {
     
     public override func update() {
         super.update()
-        accessoryType = .DisclosureIndicator
+        accessoryType = .disclosureIndicator
         editingAccessoryType = accessoryType
-        selectionStyle = row.isDisabled ? .None : .Default
+        selectionStyle = row.isDisabled ? .none : .default
     }
 }
 
@@ -45,10 +45,10 @@ public class SelectorRow<T: Equatable, Cell: CellType, VCType: TypedRowControlle
             controller.row = self
             controller.title = selectorTitle ?? controller.title
             onPresentCallback?(cell.formViewController()!, controller)
-            presentationMode.presentViewController(controller, row: self, presentingViewController: self.cell.formViewController()!)
+            presentationMode.presentViewController(viewController: controller, row: self, presentingViewController: self.cell.formViewController()!)
         }
         else{
-            presentationMode.presentViewController(nil, row: self, presentingViewController: self.cell.formViewController()!)
+            presentationMode.presentViewController(viewController: nil, row: self, presentingViewController: self.cell.formViewController()!)
         }
     }
     
@@ -56,7 +56,7 @@ public class SelectorRow<T: Equatable, Cell: CellType, VCType: TypedRowControlle
      Prepares the pushed row setting its title and completion callback.
      */
     public override func prepareForSegue(segue: UIStoryboardSegue) {
-        super.prepareForSegue(segue)
+        super.prepareForSegue(segue: segue)
         guard let rowVC = segue.destinationViewController as? VCType else { return }
         rowVC.title = selectorTitle ?? rowVC.title
         rowVC.completionCallback = presentationMode?.completionHandler ?? rowVC.completionCallback

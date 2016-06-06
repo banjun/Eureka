@@ -26,12 +26,12 @@ public class _DateInlineRow: _DateInlineFieldRow {
     
     public required init(tag: String?) {
         super.init(tag: tag)
-        dateFormatter?.timeStyle = .NoStyle
-        dateFormatter?.dateStyle = .MediumStyle
+        dateFormatter?.timeStyle = .noStyle
+        dateFormatter?.dateStyle = .mediumStyle
     }
     
     public func setupInlineRow(inlineRow: DatePickerRow) {
-        configureInlineRow(inlineRow)
+        configureInlineRow(inlineRow: inlineRow)
     }
 }
 
@@ -41,12 +41,12 @@ public class _TimeInlineRow: _DateInlineFieldRow {
     
     public required init(tag: String?) {
         super.init(tag: tag)
-        dateFormatter?.timeStyle = .ShortStyle
-        dateFormatter?.dateStyle = .NoStyle
+        dateFormatter?.timeStyle = .shortStyle
+        dateFormatter?.dateStyle = .noStyle
     }
     
     public func setupInlineRow(inlineRow: TimePickerRow) {
-        configureInlineRow(inlineRow)
+        configureInlineRow(inlineRow: inlineRow)
     }
 }
 
@@ -56,12 +56,12 @@ public class _DateTimeInlineRow: _DateInlineFieldRow {
     
     public required init(tag: String?) {
         super.init(tag: tag)
-        dateFormatter?.timeStyle = .ShortStyle
-        dateFormatter?.dateStyle = .ShortStyle
+        dateFormatter?.timeStyle = .shortStyle
+        dateFormatter?.dateStyle = .shortStyle
     }
     
     public func setupInlineRow(inlineRow: DateTimePickerRow) {
-        configureInlineRow(inlineRow)
+        configureInlineRow(inlineRow: inlineRow)
     }
 }
 
@@ -75,8 +75,8 @@ public class _CountDownInlineRow: _DateInlineFieldRow {
             guard let date = $0 else {
                 return nil
             }
-            let hour = NSCalendar.currentCalendar().component(.Hour, fromDate: date)
-            let min = NSCalendar.currentCalendar().component(.Minute, fromDate: date)
+            let hour = NSCalendar.current().component(.hour, from: date)
+            let min = NSCalendar.current().component(.minute, from: date)
             if hour == 1{
                 return "\(hour) hour \(min) min"
             }
@@ -85,7 +85,7 @@ public class _CountDownInlineRow: _DateInlineFieldRow {
     }
     
     public func setupInlineRow(inlineRow: CountDownPickerRow) {
-        configureInlineRow(inlineRow)
+        configureInlineRow(inlineRow: inlineRow)
     }
 }
 

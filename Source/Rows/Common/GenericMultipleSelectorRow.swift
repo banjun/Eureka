@@ -33,9 +33,9 @@ public class GenericMultipleSelectorRow<T: Hashable, Cell: CellType, VCType: Typ
     required public init(tag: String?) {
         super.init(tag: tag)
         displayValueFor = { (rowValue: Set<T>?) in
-            return rowValue?.map({ String($0) }).joinWithSeparator(", ")
+            return rowValue?.map({ String($0) }).joined(separator: ", ")
         }
-        presentationMode = .Show(controllerProvider: ControllerProvider.Callback { return VCType() }, completionCallback: { vc in vc.navigationController?.popViewControllerAnimated(true) })
+        presentationMode = .Show(controllerProvider: ControllerProvider.Callback { return VCType() }, completionCallback: { vc in _ = vc.navigationController?.popViewController(animated: true) })
     }
     
     /**
@@ -48,10 +48,10 @@ public class GenericMultipleSelectorRow<T: Hashable, Cell: CellType, VCType: Typ
             controller.row = self
             controller.title = selectorTitle ?? controller.title
             onPresentCallback?(cell.formViewController()!, controller)
-            presentationMode.presentViewController(controller, row: self, presentingViewController: self.cell.formViewController()!)
+            presentationMode.presentViewController(viewController: controller, row: self, presentingViewController: self.cell.formViewController()!)
         }
         else{
-            presentationMode.presentViewController(nil, row: self, presentingViewController: self.cell.formViewController()!)
+            presentationMode.presentViewController(viewController: nil, row: self, presentingViewController: self.cell.formViewController()!)
         }
     }
     
@@ -59,7 +59,7 @@ public class GenericMultipleSelectorRow<T: Hashable, Cell: CellType, VCType: Typ
      Prepares the pushed row setting its title and completion callback.
      */
     public override func prepareForSegue(segue: UIStoryboardSegue) {
-        super.prepareForSegue(segue)
+        super.prepareForSegue(segue: segue)
         guard let rowVC = segue.destinationViewController as? VCType else { return }
         rowVC.title = selectorTitle ?? rowVC.title
         rowVC.completionCallback = presentationMode?.completionHandler ?? rowVC.completionCallback

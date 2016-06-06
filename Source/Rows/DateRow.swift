@@ -12,9 +12,9 @@ public class _DateRow: _DateFieldRow {
     required public init(tag: String?) {
         super.init(tag: tag)
         dateFormatter = NSDateFormatter()
-        dateFormatter?.timeStyle = .NoStyle
-        dateFormatter?.dateStyle = .MediumStyle
-        dateFormatter?.locale = NSLocale.currentLocale()
+        dateFormatter?.timeStyle = .noStyle
+        dateFormatter?.dateStyle = .mediumStyle
+        dateFormatter?.locale = NSLocale.current()
     }
 }
 
@@ -23,9 +23,9 @@ public class _TimeRow: _DateFieldRow {
     required public init(tag: String?) {
         super.init(tag: tag)
         dateFormatter = NSDateFormatter()
-        dateFormatter?.timeStyle = .ShortStyle
-        dateFormatter?.dateStyle = .NoStyle
-        dateFormatter?.locale = NSLocale.currentLocale()
+        dateFormatter?.timeStyle = .shortStyle
+        dateFormatter?.dateStyle = .noStyle
+        dateFormatter?.locale = NSLocale.current()
     }
 }
 
@@ -33,9 +33,9 @@ public class _DateTimeRow: _DateFieldRow {
     required public init(tag: String?) {
         super.init(tag: tag)
         dateFormatter = NSDateFormatter()
-        dateFormatter?.timeStyle = .ShortStyle
-        dateFormatter?.dateStyle = .ShortStyle
-        dateFormatter?.locale = NSLocale.currentLocale()
+        dateFormatter?.timeStyle = .shortStyle
+        dateFormatter?.dateStyle = .shortStyle
+        dateFormatter?.locale = NSLocale.current()
     }
 }
 
@@ -47,9 +47,9 @@ public class _CountDownRow: _DateFieldRow {
                 return nil
             }
             if let formatter = self.dateFormatter {
-                return formatter.stringFromDate(val)
+                return formatter.string(from: val)
             }
-            let components = NSCalendar.currentCalendar().components(NSCalendarUnit.Minute.union(NSCalendarUnit.Hour), fromDate: val)
+            let components = NSCalendar.current().components(NSCalendarUnit.minute.union(NSCalendarUnit.hour), from: val)
             var hourString = "hour"
             if components.hour != 1{
                 hourString += "s"

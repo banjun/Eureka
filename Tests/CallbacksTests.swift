@@ -33,7 +33,7 @@ class CallbacksTests: XCTestCase {
     override func setUp() {
         super.setUp()
         // load the view to test the cells
-        formVC.view.frame = CGRectMake(0, 0, 375, 3000)
+        formVC.view.frame = CGRect(x: 0, y: 0, width: 375, height: 3000)
         formVC.tableView?.frame = formVC.view.frame
     }
     

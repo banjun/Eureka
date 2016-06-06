@@ -25,19 +25,19 @@ public class DateCell : Cell<NSDate>, CellType {
     
     public override func setup() {
         super.setup()
-        accessoryType = .None
-        editingAccessoryType =  .None
+        accessoryType = .none
+        editingAccessoryType =  .none
         datePicker.datePickerMode = datePickerMode()
-        datePicker.addTarget(self, action: #selector(DateCell.datePickerValueChanged(_:)), forControlEvents: .ValueChanged)
+        datePicker.addTarget(self, action: #selector(DateCell.datePickerValueChanged(sender:)), for: .valueChanged)
     }
     
     deinit {
-        datePicker.removeTarget(self, action: nil, forControlEvents: .AllEvents)
+        datePicker.removeTarget(self, action: nil, for: .allEvents)
     }
     
     public override func update() {
         super.update()
-        selectionStyle = row.isDisabled ? .None : .Default
+        selectionStyle = row.isDisabled ? .none : .default
         datePicker.setDate(row.value ?? NSDate(), animated: row is CountDownPickerRow)
         datePicker.minimumDate = (row as? DatePickerRowProtocol)?.minimumDate
         datePicker.maximumDate = (row as? DatePickerRowProtocol)?.maximumDate
@@ -66,15 +66,15 @@ public class DateCell : Cell<NSDate>, CellType {
     private func datePickerMode() -> UIDatePickerMode{
         switch row {
         case is DateRow:
-            return .Date
+            return .date
         case is TimeRow:
-            return .Time
+            return .time
         case is DateTimeRow:
-            return .DateAndTime
+            return .dateAndTime
         case is CountDownRow:
-            return .CountDownTimer
+            return .countDownTimer
         default:
-            return .Date
+            return .date
         }
     }
     
@@ -108,7 +108,7 @@ public class _DateFieldRow: Row<NSDate, DateCell>, DatePickerRowProtocol, NoValu
         super.init(tag: tag)
         displayValueFor = { [unowned self] value in
             guard let val = value, let formatter = self.dateFormatter else { return nil }
-            return formatter.stringFromDate(val)
+            return formatter.string(from: val)
         }
     }
 }

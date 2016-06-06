@@ -14,9 +14,9 @@ public class DatePickerCell : Cell<NSDate>, CellType {
         let picker = UIDatePicker()
         picker.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addSubview(picker)
-        self.contentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-0-[picker]-0-|", options: [], metrics: nil, views: ["picker": picker]))
-        self.contentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[picker]-0-|", options: [], metrics: nil, views: ["picker": picker]))
-        picker.addTarget(self, action: #selector(DatePickerCell.datePickerValueChanged(_:)), forControlEvents: .ValueChanged)
+        self.contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-0-[picker]-0-|", options: [], metrics: nil, views: ["picker": picker]))
+        self.contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-0-[picker]-0-|", options: [], metrics: nil, views: ["picker": picker]))
+        picker.addTarget(self, action: #selector(DatePickerCell.datePickerValueChanged(sender:)), for: .valueChanged)
         return picker
         }()
     
@@ -26,19 +26,19 @@ public class DatePickerCell : Cell<NSDate>, CellType {
     
     public override func setup() {
         super.setup()
-        accessoryType = .None
-        editingAccessoryType =  .None
+        accessoryType = .none
+        editingAccessoryType =  .none
         datePicker.datePickerMode = datePickerMode()
     }
     
     deinit {
-        datePicker.removeTarget(self, action: nil, forControlEvents: .AllEvents)
+        datePicker.removeTarget(self, action: nil, for: .allEvents)
     }
     
     public override func update() {
         super.update()
-        selectionStyle = row.isDisabled ? .None : .Default
-        datePicker.userInteractionEnabled = !row.isDisabled
+        selectionStyle = row.isDisabled ? .none : .default
+        datePicker.isUserInteractionEnabled = !row.isDisabled
         detailTextLabel?.text = nil
         textLabel?.text = nil
         datePicker.setDate(row.value ?? NSDate(), animated: row is CountDownPickerRow)
@@ -56,15 +56,15 @@ public class DatePickerCell : Cell<NSDate>, CellType {
     private func datePickerMode() -> UIDatePickerMode{
         switch row {
         case is DatePickerRow:
-            return .Date
+            return .date
         case is TimePickerRow:
-            return .Time
+            return .time
         case is DateTimePickerRow:
-            return .DateAndTime
+            return .dateAndTime
         case is CountDownPickerRow:
-            return .CountDownTimer
+            return .countDownTimer
         default:
-            return .Date
+            return .date
         }
     }
 }

@@ -35,9 +35,9 @@ public class SelectorAlertController<T: Equatable> : UIAlertController, TypedRow
     public override func viewDidLoad() {
         super.viewDidLoad()
         guard let options = row.dataProvider?.arrayData else { return }
-        addAction(UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil))
+        addAction(UIAlertAction(title: cancelTitle, style: .cancel, handler: nil))
         for option in options {
-            addAction(UIAlertAction(title: row.displayValueFor?(option), style: .Default, handler: { [weak self] _ in
+            addAction(UIAlertAction(title: row.displayValueFor?(option), style: .default, handler: { [weak self] _ in
                 self?.row.value = option
                 self?.completionCallback?(self!)
                 }))

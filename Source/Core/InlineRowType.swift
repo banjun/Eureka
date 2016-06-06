@@ -73,7 +73,7 @@ extension InlineRowType where Self: BaseRow, Self.InlineRow : BaseRow, Self.Cell
                 self?.value = $0.value
                 self?.updateCell()
             }
-            setupInlineRow(inline)
+            setupInlineRow(inlineRow: inline)
             if (form.inlineRowHideOptions ?? Form.defaultInlineRowHideOptions).contains(.AnotherInlineRowIsShown) {
                 for row in form.allRows {
                     if let inlineRow = row as? BaseInlineRowType {
@@ -85,9 +85,9 @@ extension InlineRowType where Self: BaseRow, Self.InlineRow : BaseRow, Self.Cell
                 onExpandInlineRowCallback(cell, self, inline)
             }
             if let indexPath = indexPath() {
-                section.insert(inline, atIndex: indexPath.row + 1)
+                section.insert(inline, at: indexPath.row + 1)
                 _inlineRow = inline
-                cell.formViewController()?.makeRowVisible(inline)
+                cell.formViewController()?.makeRowVisible(row: inline)
             }
         }
     }
@@ -100,7 +100,7 @@ extension InlineRowType where Self: BaseRow, Self.InlineRow : BaseRow, Self.Cell
             if let onCollapseInlineRowCallback = onCollapseInlineRowCallback {
                 onCollapseInlineRowCallback(cell, self, inlineRow as! InlineRow)
             }
-            section?.removeAtIndex(selectedRowPath.row + 1)
+            section?.remove(at: selectedRowPath.row + 1)
             _inlineRow = nil
         }
     }
@@ -120,6 +120,7 @@ extension InlineRowType where Self: BaseRow, Self.InlineRow : BaseRow, Self.Cell
     /**
      Sets a block to be executed when a row is expanded.
      */
+    @discardableResult
     public func onExpandInlineRow(callback: (Cell, Self, InlineRow)->()) -> Self {
         callbackOnExpandInlineRow = callback
         return self
@@ -128,6 +129,7 @@ extension InlineRowType where Self: BaseRow, Self.InlineRow : BaseRow, Self.Cell
     /**
      Sets a block to be executed when a row is collapsed.
      */
+    @discardableResult
     public func onCollapseInlineRow(callback: (Cell, Self, InlineRow)->()) -> Self {
         callbackOnCollapseInlineRow = callback
         return self

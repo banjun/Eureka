@@ -18,10 +18,10 @@ public class ButtonCellOf<T: Equatable>: Cell<T>, CellType {
     
     public override func update() {
         super.update()
-        selectionStyle = row.isDisabled ? .None : .Default
-        accessoryType = .None
+        selectionStyle = row.isDisabled ? .none : .default
+        accessoryType = .none
         editingAccessoryType = accessoryType
-        textLabel?.textAlignment = .Center
+        textLabel?.textAlignment = .center
         textLabel?.textColor = tintColor
         var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
         tintColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
@@ -45,7 +45,7 @@ public class _ButtonRowOf<T: Equatable> : Row<T, ButtonCellOf<T>> {
     required public init(tag: String?) {
         super.init(tag: tag)
         displayValueFor = nil
-        cellStyle = .Default
+        cellStyle = .default
     }
     
     public override func customDidSelect() {
@@ -53,10 +53,10 @@ public class _ButtonRowOf<T: Equatable> : Row<T, ButtonCellOf<T>> {
         if !isDisabled {
             if let presentationMode = presentationMode {
                 if let controller = presentationMode.createController(){
-                    presentationMode.presentViewController(controller, row: self, presentingViewController: self.cell.formViewController()!)
+                    presentationMode.presentViewController(viewController: controller, row: self, presentingViewController: self.cell.formViewController()!)
                 }
                 else{
-                    presentationMode.presentViewController(nil, row: self, presentingViewController: self.cell.formViewController()!)
+                    presentationMode.presentViewController(viewController: nil, row: self, presentingViewController: self.cell.formViewController()!)
                 }
             }
         }
@@ -65,8 +65,8 @@ public class _ButtonRowOf<T: Equatable> : Row<T, ButtonCellOf<T>> {
     public override func customUpdateCell() {
         super.customUpdateCell()
         let leftAligmnment = presentationMode != nil
-        cell.textLabel?.textAlignment = leftAligmnment ? .Left : .Center
-        cell.accessoryType = !leftAligmnment || isDisabled ? .None : .DisclosureIndicator
+        cell.textLabel?.textAlignment = leftAligmnment ? .left : .center
+        cell.accessoryType = !leftAligmnment || isDisabled ? .none : .disclosureIndicator
         cell.editingAccessoryType = cell.accessoryType
         if (!leftAligmnment){
             var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
@@ -79,7 +79,7 @@ public class _ButtonRowOf<T: Equatable> : Row<T, ButtonCellOf<T>> {
     }
     
     public override func prepareForSegue(segue: UIStoryboardSegue) {
-        super.prepareForSegue(segue)
+        super.prepareForSegue(segue: segue)
         let rowVC = segue.destinationViewController as? RowControllerType
         rowVC?.completionCallback = self.presentationMode?.completionHandler
     }

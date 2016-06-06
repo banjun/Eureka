@@ -51,7 +51,7 @@ public class BaseCell : UITableViewCell, BaseCellType {
             if responder! is FormViewController {
                 return responder as? FormViewController
             }
-            responder = responder?.nextResponder()
+            responder = responder?.next()
         }
         return nil
     }
@@ -75,6 +75,7 @@ public class BaseCell : UITableViewCell, BaseCellType {
     /**
      Called when the cell becomes first responder
      */
+    @discardableResult
     public func cellBecomeFirstResponder(direction: Direction = .Down) -> Bool {
         return becomeFirstResponder()
     }
@@ -82,6 +83,7 @@ public class BaseCell : UITableViewCell, BaseCellType {
     /**
      Called when the cell resigns first responder
      */
+    @discardableResult
     public func cellResignFirstResponder() -> Bool {
         return resignFirstResponder()
     }
@@ -97,7 +99,7 @@ public class Cell<T: Equatable> : BaseCell, TypedCellType {
     
     /// Returns the navigationAccessoryView if it is defined or calls super if not.
     override public var inputAccessoryView: UIView? {
-        if let v = formViewController()?.inputAccessoryViewForRow(row){
+        if let v = formViewController()?.inputAccessoryViewForRow(row: row){
             return v
         }
         return super.inputAccessoryView
@@ -125,7 +127,7 @@ public class Cell<T: Equatable> : BaseCell, TypedCellType {
     public override func update(){
         super.update()
         textLabel?.text = row.title
-        textLabel?.textColor = row.isDisabled ? .grayColor() : .blackColor()
+        textLabel?.textColor = row.isDisabled ? .gray() : .black()
         detailTextLabel?.text = row.displayValueFor?(row.value) ?? (row as? NoValueDisplayTextConformance)?.noValueDisplayText
     }
     
@@ -141,7 +143,7 @@ public class Cell<T: Equatable> : BaseCell, TypedCellType {
     public override func becomeFirstResponder() -> Bool {
         let result = super.becomeFirstResponder()
         if result {
-            formViewController()?.beginEditing(self)
+            formViewController()?.beginEditing(cell: self)
         }
         return result
     }
@@ -149,7 +151,7 @@ public class Cell<T: Equatable> : BaseCell, TypedCellType {
     public override func resignFirstResponder() -> Bool {
         let result = super.resignFirstResponder()
         if result {
-            formViewController()?.endEditing(self)
+            formViewController()?.endEditing(cell: self)
         }
         return result
     }

@@ -49,7 +49,7 @@ public enum SelectionType {
 /**
  *  Protocol to be implemented by selectable sections types. Enables easier customization
  */
-public protocol SelectableSectionType: CollectionType {
+public protocol SelectableSectionType: Collection {
     associatedtype SelectableRow: BaseRow, SelectableRowType
     
     /// Defines how the selection works (single / multiple selection)
@@ -62,7 +62,7 @@ public protocol SelectableSectionType: CollectionType {
     func selectedRows() -> [SelectableRow]
 }
 
-extension SelectableSectionType where Self: Section, SelectableRow.Value == SelectableRow.Cell.Value, Self.Generator == IndexingGenerator<Section>, Self.Generator.Element == BaseRow {
+extension SelectableSectionType where Self: Section, SelectableRow.Value == SelectableRow.Cell.Value, Self.Iterator == IndexingIterator<Section>, Self.Iterator.Element == BaseRow {
     
     /**
      Returns the selected row of this section. Should be used if selectionType is SingleSelection
@@ -119,16 +119,16 @@ public class SelectableSection<Row: SelectableRowType, T where Row: BaseRow, Row
     /// A closure called when a row of this section is selected.
     public var onSelectSelectableRow: ((Row.Cell, Row) -> Void)?
     
-    public required init(@noescape _ initializer: Section -> ()) {
+    public required init( _ initializer: @noescape (Section) -> ()) {
         super.init(initializer)
     }
     
-    public init(_ header: String, selectionType: SelectionType, @noescape _ initializer: Section -> () = { _ in }) {
+    public init(_ header: String, selectionType: SelectionType, _ initializer: @noescape (Section) -> () = { _ in }) {
         self.selectionType = selectionType
         super.init(header, initializer)
     }
     
     public override func rowsHaveBeenAdded(rows: [BaseRow], atIndexes: NSIndexSet) {
-        prepareSelectableRows(rows)
+        prepareSelectableRows(rows: rows)
     }
 }

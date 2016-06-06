@@ -161,7 +161,7 @@ public class _FloatLabelCell<T where T: Equatable, T: InputTypeInitiable>: Cell<
         selectionStyle = .None
         contentView.addSubview(floatLabelTextField)
         floatLabelTextField.delegate = self
-        floatLabelTextField.addTarget(self, action: #selector(_FloatLabelCell.textFieldDidChange(_:)), forControlEvents: .EditingChanged)
+        floatLabelTextField.addTarget(self, action: #selector(_FloatLabelCell.textFieldDidChange(textField:)), forControlEvents: .EditingChanged)
         contentView.addConstraints(layoutConstraints())
     }
     
@@ -201,26 +201,26 @@ public class _FloatLabelCell<T where T: Equatable, T: InputTypeInitiable>: Cell<
         }
         if let fieldRow = row as? FormatterConformance, let formatter = fieldRow.formatter {
             if fieldRow.useFormatterDuringInput {
-                let value: AutoreleasingUnsafeMutablePointer<AnyObject?> = AutoreleasingUnsafeMutablePointer<AnyObject?>.init(UnsafeMutablePointer<T>.alloc(1))
+                let value: AutoreleasingUnsafeMutablePointer<AnyObject?> = AutoreleasingUnsafeMutablePointer<AnyObject?>.init(UnsafeMutablePointer<T>(allocatingCapacity: 1))
                 let errorDesc: AutoreleasingUnsafeMutablePointer<NSString?> = nil
                 if formatter.getObjectValue(value, forString: textValue, errorDescription: errorDesc) {
-                    row.value = value.memory as? T
+                    row.value = value.pointee as? T
                     if var selStartPos = textField.selectedTextRange?.start {
                         let oldVal = textField.text
                         textField.text = row.displayValueFor?(row.value)
                         if let f = formatter as? FormatterProtocol {
                             selStartPos = f.getNewPosition(forPosition: selStartPos, inTextInput: textField, oldValue: oldVal, newValue: textField.text)
                         }
-                        textField.selectedTextRange = textField.textRangeFromPosition(selStartPos, toPosition: selStartPos)
+                        textField.selectedTextRange = textField.textRange(from: selStartPos, to: selStartPos)
                     }
                     return
                 }
             }
             else {
-                let value: AutoreleasingUnsafeMutablePointer<AnyObject?> = AutoreleasingUnsafeMutablePointer<AnyObject?>.init(UnsafeMutablePointer<T>.alloc(1))
+                let value: AutoreleasingUnsafeMutablePointer<AnyObject?> = AutoreleasingUnsafeMutablePointer<AnyObject?>.init(UnsafeMutablePointer<T>(allocatingCapacity: 1))
                 let errorDesc: AutoreleasingUnsafeMutablePointer<NSString?> = nil
                 if formatter.getObjectValue(value, forString: textValue, errorDescription: errorDesc) {
-                    row.value = value.memory as? T
+                    row.value = value.pointee as? T
                 }
                 return
             }
@@ -238,7 +238,7 @@ public class _FloatLabelCell<T where T: Equatable, T: InputTypeInitiable>: Cell<
     
     //Mark: Helpers
     
-    private func displayValue(useFormatter useFormatter: Bool) -> String? {
+    private func displayValue(useFormatter: Bool) -> String? {
         guard let v = row.value else { return nil }
         if let formatter = (row as? FormatterConformance)?.formatter where useFormatter {
             return textField.isFirstResponder() ? formatter.editingStringForObjectValue(v as! AnyObject) : formatter.stringForObjectValue(v as! AnyObject)
@@ -489,7 +489,7 @@ public class MapViewController : UIViewController, TypedRowControllerType, MKMap
         }()
     
     lazy var pinView: UIImageView = { [unowned self] in
-        let v = UIImageView(frame: CGRectMake(0, 0, 50, 50))
+        let v = UIImageView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
         v.image = UIImage(named: "map_pin", inBundle: NSBundle(forClass: MapViewController.self), compatibleWithTraitCollection: nil)
         v.image = v.image?.imageWithRenderingMode(.AlwaysTemplate)
         v.tintColor = self.view.tintColor
@@ -511,7 +511,7 @@ public class MapViewController : UIViewController, TypedRowControllerType, MKMap
     
     lazy var ellipsisLayer: CAShapeLayer = { [unowned self] in
         let layer = CAShapeLayer()
-        layer.bounds = CGRectMake(0, 0, self.width, self.height)
+        layer.bounds = CGRect(x: 0, y: 0, width: self.width, height: self.height)
         layer.path = self.ellipse.CGPath
         layer.fillColor = UIColor.grayColor().CGColor
         layer.fillRule = kCAFillRuleNonZero

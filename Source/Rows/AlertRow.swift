@@ -14,11 +14,11 @@ public class _AlertRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: 
     public var onPresentCallback : ((FormViewController, SelectorAlertController<T>)->())?
     lazy public var presentationMode: PresentationMode<SelectorAlertController<T>>? = {
         return .PresentModally(controllerProvider: ControllerProvider.Callback { [weak self] in
-            let vc = SelectorAlertController<T>(title: self?.selectorTitle, message: nil, preferredStyle: .Alert)
+            let vc = SelectorAlertController<T>(title: self?.selectorTitle, message: nil, preferredStyle: .alert)
             vc.row = self
             return vc
             }, completionCallback: { [weak self] in
-                $0.dismissViewControllerAnimated(true, completion: nil)
+                $0.dismiss(animated: true, completion: nil)
                 self?.cell?.formViewController()?.tableView?.reloadData()
             }
         )
@@ -34,10 +34,10 @@ public class _AlertRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: 
             if let controller = presentationMode.createController(){
                 controller.row = self
                 onPresentCallback?(cell.formViewController()!, controller)
-                presentationMode.presentViewController(controller, row: self, presentingViewController: cell.formViewController()!)
+                presentationMode.presentViewController(viewController: controller, row: self, presentingViewController: cell.formViewController()!)
             }
             else{
-                presentationMode.presentViewController(nil, row: self, presentingViewController: cell.formViewController()!)
+                presentationMode.presentViewController(viewController: nil, row: self, presentingViewController: cell.formViewController()!)
             }
         }
     }

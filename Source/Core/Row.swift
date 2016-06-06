@@ -33,7 +33,7 @@ public class RowOf<T: Equatable>: BaseRow {
             guard value != oldValue else { return }
             guard let form = section?.form else { return }
             if let delegate = form.delegate {
-                delegate.rowValueHasBeenChanged(self, oldValue: oldValue, newValue: value)
+                delegate.rowValueHasBeenChanged(row: self, oldValue: oldValue, newValue: value)
                 callbackOnChange?()
             }
             guard let t = tag else { return }
@@ -61,7 +61,7 @@ public class RowOf<T: Equatable>: BaseRow {
     public var dataProvider: DataProvider<T>?
     
     /// Block variable used to get the String that should be displayed for the value of this row.
-    public var displayValueFor : (T? -> String?)? = {
+    public var displayValueFor : ((T?) -> String?)? = {
         if let t = $0 {
             return String(t)
         }
@@ -85,14 +85,14 @@ public class Row<T: Equatable, Cell: CellType where Cell: TypedCellType, Cell: B
     private var _cell: Cell! {
         didSet {
             RowDefaults.cellSetup["\(self.dynamicType)"]?(_cell, self)
-            (callbackCellSetup as? (Cell -> ()))?(_cell)
+            (callbackCellSetup as? ((Cell) -> ()))?(_cell)
         }
     }
     
     /// The cell associated to this row.
     public var cell : Cell! {
         return _cell ?? {
-            let result = cellProvider.createCell(self.cellStyle)
+            let result = cellProvider.createCell(cellStyle: self.cellStyle)
             result.row = self
             result.setup()
             _cell = result
