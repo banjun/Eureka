@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class _PopoverSelectorRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell.Value == T> : SelectorRow<T, Cell, SelectorViewController<T>> {
+public class _PopoverSelectorRow<T: Equatable, Cell: BaseCell where Cell: TypedCellType> : SelectorRow<T, Cell, SelectorViewController<T>> {
     
     public required init(tag: String?) {
         super.init(tag: tag)

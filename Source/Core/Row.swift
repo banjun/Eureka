@@ -74,7 +74,7 @@ public class RowOf<T: Equatable>: BaseRow {
 }
 
 /// Generic class that represents an Eureka row.
-public class Row<T: Equatable, Cell: CellType where Cell: TypedCellType, Cell: BaseCell, Cell.Value == T>: RowOf<T>,  TypedRowType {
+public class Row<T: Equatable, Cell: BaseCell where Cell: TypedCellType>: RowOf<T>,  TypedRowType {
     
     /// Responsible for creating the cell for this row.
     public var cellProvider = CellProvider<Cell>()
@@ -93,7 +93,7 @@ public class Row<T: Equatable, Cell: CellType where Cell: TypedCellType, Cell: B
     public var cell : Cell! {
         return _cell ?? {
             let result = cellProvider.createCell(cellStyle: self.cellStyle)
-            result.row = self
+            result.row = unsafeBitCast(self, to: RowOf<Cell.Value>.self)
             result.setup()
             _cell = result
             return _cell

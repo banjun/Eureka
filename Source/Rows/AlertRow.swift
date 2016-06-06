@@ -9,7 +9,7 @@
 import Foundation
 
 
-public class _AlertRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell.Value == T>: OptionsRow<T, Cell>, PresenterRowType {
+public class _AlertRow<T: Equatable, Cell: BaseCell where Cell: TypedCellType>: OptionsRow<T, Cell>, PresenterRowType {
     
     public var onPresentCallback : ((FormViewController, SelectorAlertController<T>)->())?
     lazy public var presentationMode: PresentationMode<SelectorAlertController<T>>? = {

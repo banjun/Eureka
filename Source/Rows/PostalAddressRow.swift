@@ -663,7 +663,7 @@ public class PostalAddressCell<T: PostalAddressType>: Cell<T>, CellType, PostalA
 
 //MARK: PostalAddressRow
 
-public class _PostalAddressRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell: PostalAddressCellConformance, Cell.Value == T>: Row<T, Cell>, PostalAddressRowConformance, KeyboardReturnHandler {
+public class _PostalAddressRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell: PostalAddressCellConformance>: Row<T, Cell>, PostalAddressRowConformance, KeyboardReturnHandler {
     
     /// Configuration for the keyboardReturnType of this row
     public var keyboardReturnType : KeyboardReturnTypeConfiguration?

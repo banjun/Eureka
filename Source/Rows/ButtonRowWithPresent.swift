@@ -24,7 +24,7 @@
 
 import Foundation
 
-public class _ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType where VCType: UIViewController, VCType.RowValue == T>: Row<T, ButtonCellOf<T>>, PresenterRowType {
+public class _ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType where VCType: UIViewController>: Row<T, ButtonCellOf<T>>, PresenterRowType {
     
     public var presentationMode: PresentationMode<VCType>?
     public var onPresentCallback : ((FormViewController, VCType)->())?
@@ -55,7 +55,7 @@ public class _ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType 
         super.customDidSelect()
         if let presentationMode = presentationMode where !isDisabled {
             if let controller = presentationMode.createController(){
-                controller.row = self
+                controller.row = unsafeBitCast(self, to: RowOf<VCType.RowValue>.self)
                 onPresentCallback?(cell.formViewController()!, controller)
                 presentationMode.presentViewController(viewController: controller, row: self, presentingViewController: cell.formViewController()!)
             }
@@ -73,7 +73,7 @@ public class _ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType 
         if let callback = self.presentationMode?.completionHandler{
             rowVC.completionCallback = callback
         }
-        rowVC.row = self
+        rowVC.row = unsafeBitCast(self, to: RowOf<VCType.RowValue>.self)
         onPresentCallback?(cell.formViewController()!, rowVC)
     }
     
@@ -83,7 +83,7 @@ public class _ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType 
 //MARK: Rows
 
 /// A generic row with a button that presents a view controller when tapped
-public final class ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType where VCType: UIViewController, VCType.RowValue == T> : _ButtonRowWithPresent<T, VCType>, RowType {
+public final class ButtonRowWithPresent<T: Equatable, VCType: TypedRowControllerType where VCType: UIViewController> : _ButtonRowWithPresent<T, VCType>, RowType {
     public required init(tag: String?) {
         super.init(tag: tag)
     }

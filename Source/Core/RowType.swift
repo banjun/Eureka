@@ -102,7 +102,7 @@ extension RowType where Self: TypedRowType, Self: BaseRow, Self.Cell.Value == Se
 }
 
 
-extension RowType where Self: TypedRowType, Self: BaseRow, Self.Cell.Value == Self.Value {
+extension RowType where Self: TypedRowType, Self: BaseRow {
     
     /// The default block executed when the cell is updated. Applies to every row of this type.
     public static var defaultCellUpdate:((Cell, Self) -> ())? {

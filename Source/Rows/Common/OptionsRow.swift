@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class OptionsRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell.Value == T> : Row<T, Cell>, NoValueDisplayTextConformance {
+public class OptionsRow<T: Equatable, Cell: BaseCell where Cell: TypedCellType> : Row<T, Cell>, NoValueDisplayTextConformance {
     
     public var options: [T] {
         get { return dataProvider?.arrayData ?? [] }

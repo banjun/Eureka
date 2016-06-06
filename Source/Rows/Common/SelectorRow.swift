@@ -23,7 +23,7 @@ public class PushSelectorCell<T: Equatable> : Cell<T>, CellType {
 }
 
 /// Generic row type where a user must select a value among several options.
-public class SelectorRow<T: Equatable, Cell: CellType, VCType: TypedRowControllerType where Cell: BaseCell, Cell: TypedCellType, Cell.Value == T, VCType: UIViewController,  VCType.RowValue == T>: OptionsRow<T, Cell>, PresenterRowType {
+public class SelectorRow<T: Equatable, Cell: BaseCell, VCType: TypedRowControllerType where Cell: TypedCellType, VCType: UIViewController>: OptionsRow<T, Cell>, PresenterRowType {
     
     /// Defines how the view controller will be presented, pushed, etc.
     public var presentationMode: PresentationMode<VCType>?
@@ -42,7 +42,7 @@ public class SelectorRow<T: Equatable, Cell: CellType, VCType: TypedRowControlle
         super.customDidSelect()
         guard let presentationMode = presentationMode where !isDisabled else { return }
         if let controller = presentationMode.createController(){
-            controller.row = self
+            controller.row = unsafeBitCast(self, to: RowOf<VCType.RowValue>.self)
             controller.title = selectorTitle ?? controller.title
             onPresentCallback?(cell.formViewController()!, controller)
             presentationMode.presentViewController(viewController: controller, row: self, presentingViewController: self.cell.formViewController()!)
@@ -61,6 +61,6 @@ public class SelectorRow<T: Equatable, Cell: CellType, VCType: TypedRowControlle
         rowVC.title = selectorTitle ?? rowVC.title
         rowVC.completionCallback = presentationMode?.completionHandler ?? rowVC.completionCallback
         onPresentCallback?(cell.formViewController()!, rowVC)
-        rowVC.row = self
+        rowVC.row = unsafeBitCast(self, to: RowOf<VCType.RowValue>.self)
     }
 }

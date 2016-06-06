@@ -236,7 +236,7 @@ public class TextAreaCell : _TextAreaCell<String>, CellType {
     }
 }
 
-public class AreaRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell: AreaCell, Cell.Value == T>: FormatteableRow<T, Cell>, TextAreaConformance {
+public class AreaRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell: AreaCell>: FormatteableRow<T, Cell>, TextAreaConformance {
     
     public var placeholder : String?
     public var textAreaHeight = TextAreaHeight.Fixed(cellHeight: 110)
