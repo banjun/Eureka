@@ -405,7 +405,7 @@ public class AccountFloatLabelCell : _FloatLabelCell<String>, CellType {
 
 //MARK: FloatLabelRow
 
-public class FloatFieldRow<T: Any, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell: TextFieldCell, Cell.Value == T>: FormatteableRow<T, Cell> {
+public class FloatFieldRow<T: Equatable, Cell: CellType where Cell: BaseCell, Cell: TypedCellType, Cell: TextFieldCell>: FormatteableRow<T, Cell> {
 
 
     public required init(tag: String?) {
