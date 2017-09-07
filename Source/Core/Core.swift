@@ -735,7 +735,8 @@ extension FormViewController : UITableViewDelegate {
             return height()
         }
         guard let view = form[section].header?.viewForSection(form[section], type: .header) else {
-            return UITableViewAutomaticDimension
+            guard form[section].header?.title == nil else { return UITableViewAutomaticDimension }
+            return 0
         }
         guard view.bounds.height != 0 else {
             return UITableViewAutomaticDimension
@@ -748,7 +749,8 @@ extension FormViewController : UITableViewDelegate {
             return height()
         }
         guard let view = form[section].footer?.viewForSection(form[section], type: .footer) else {
-            return UITableViewAutomaticDimension
+            guard form[section].footer?.title == nil else { return UITableViewAutomaticDimension }
+            return 0
         }
         guard view.bounds.height != 0 else {
             return UITableViewAutomaticDimension
